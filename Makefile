@@ -1,0 +1,4 @@
+
+
+all:
+	pip install -e .
