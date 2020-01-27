@@ -18,16 +18,16 @@ def prod_tconorm(fs):
     return reduce(lambda f1, f2: f1 + f2 - f1*f2, fs)
 
 
-def iff(f1, f2):
-    return prod_tconorm((prod_tnorm((f1, f2)), prod_tnorm((neg(f1), neg(f2)))))
+def iff(f1, f2, tnorm=prod_tnorm, tconorm=prod_tconorm):
+    return tconorm((tnorm((f1, f2)), tnorm((neg(f1), neg(f2)))))
 
 
 def ite(c1, f1, f2):
     return (f1*c1) + f2*(1-c1)
 
 
-def implies(f1, f2):
-    return prod_tconorm((neg(f1), f2))
+def implies(f1, f2, tconorm=prod_tconorm):
+    return tconorm((neg(f1), f2))
 
 
 ##########################################
@@ -392,8 +392,6 @@ class Gt(ClnOp,torch.nn.Module):
         super(Gt, self).__init__()
         self.expr = expr
         self.B = B
-        if B is not None:
-            self.B = torch.nn.Parameter(torch.tensor(B, requires_grad=True), requires_grad=True)
         self.eps = eps
 
     def forward(self, xs):
@@ -414,8 +412,6 @@ class Ge(ClnOp,torch.nn.Module):
         super(Ge, self).__init__()
         self.expr = expr
         self.B = B
-        if B is not None:
-            self.B = torch.nn.Parameter(torch.tensor(B, requires_grad=True), requires_grad=True)
         self.eps = eps
 
     def forward(self, xs):
@@ -436,8 +432,6 @@ class Lt(ClnOp,torch.nn.Module):
         super(Lt, self).__init__()
         self.expr = expr
         self.B = B
-        if B is not None:
-            self.B = torch.nn.Parameter(torch.tensor(B, requires_grad=True), requires_grad=True)
         self.eps = eps
 
     def forward(self, xs):
@@ -458,8 +452,6 @@ class Le(ClnOp,torch.nn.Module):
         super(Le, self).__init__()
         self.expr = expr
         self.B = B
-        if B is not None:
-            self.B = torch.nn.Parameter(torch.tensor(B, requires_grad=True), requires_grad=True)
         self.eps = eps
 
     def forward(self, xs):
@@ -480,8 +472,6 @@ class Eq(ClnOp, torch.nn.Module):
         super(Eq, self).__init__()
         self.expr = expr
         self.B = B
-        if B is not None:
-            self.B = torch.nn.Parameter(torch.tensor(B, requires_grad=True), requires_grad=True)
         self.eps = eps
 
     def forward(self, xs):
@@ -502,8 +492,6 @@ class Neq(ClnOp, torch.nn.Module):
         super(Neq, self).__init__()
         self.expr = expr
         self.B = B
-        if B is not None:
-            self.B = torch.nn.Parameter(torch.tensor(B, requires_grad=True), requires_grad=True)
         self.eps = eps
 
     def forward(self, xs):
