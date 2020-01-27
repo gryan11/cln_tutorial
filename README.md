@@ -6,7 +6,7 @@
 
 - install pytorch with conda: https://pytorch.org/get-started/locally/ 
 
-- install other dependencies: `conda install jupyter matplotlib numpy tqdm`
+- install other dependencies: `conda install jupyter matplotlib numpy tqdm pandas`
 - install z3 and pysmt (not on conda): `pip install z3-solver pysmt`
 - run `make` in base directory to install the core `cln` package
 
