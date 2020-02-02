@@ -18,6 +18,14 @@ def prod_tconorm(fs):
     return reduce(lambda f1, f2: f1 + f2 - f1*f2, fs)
 
 
+def godel_tnorm(fs):
+    return torch.min(torch.stack(fs), dim=0)[0]
+
+
+def godel_tconorm(fs):
+    return torch.max(torch.stack(fs), dim=0)[0]
+
+
 def iff(f1, f2, tnorm=prod_tnorm, tconorm=prod_tconorm):
     return tconorm((tnorm((f1, f2)), tnorm((neg(f1), neg(f2)))))
 
