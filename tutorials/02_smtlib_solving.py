@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[68]:
+# In[20]:
 
 
 from pysmt.shortcuts import read_smtlib
@@ -11,6 +11,7 @@ from glob import glob
 import torch
 import cln
 import numpy as np
+import matplotlib.pyplot as plt
 
 from tqdm import trange
 import pandas as pd
@@ -41,25 +42,25 @@ get_ipython().run_line_magic('cat', '{smtlib_problems[0]}')
 
 # ## Solving with z3:
 
-# In[35]:
+# In[5]:
 
 
 s = z3.Solver()
 
 
-# In[36]:
+# In[6]:
 
 
 s.from_file(smtlib_problems[0])
 
 
-# In[37]:
+# In[7]:
 
 
 s.check()
 
 
-# In[38]:
+# In[8]:
 
 
 s.model()
@@ -67,13 +68,13 @@ s.model()
 
 # ## Can we solve with cln?
 
-# In[5]:
+# In[9]:
 
 
 root = read_smtlib(smtlib_problems[0])
 
 
-# In[6]:
+# In[10]:
 
 
 root.serialize()
@@ -81,7 +82,7 @@ root.serialize()
 
 # Generate a model for the smt:
 
-# In[10]:
+# In[11]:
 
 
 '''
@@ -125,16 +126,44 @@ x = torch.tensor([0.0, 0.0, 0.0])
 model(x)
 
 
+# In[21]:
+
+
+def train(x, model):
+    opt = torch.optim.Adam(params=[x] + list(model.parameters()), lr=0.01)
+    
+    loss_trace = []
+    for i in trange(100): # MORE EPOCHS
+        opt.zero_grad()
+        
+        cln_out = model(x)
+        loss = 1 - cln_out
+        
+        loss_trace.append(loss.item())
+
+        loss.backward()
+        opt.step()
+                
+    return pd.DataFrame({'loss':loss_trace})
+
+x = torch.tensor([0.0, 0.0, 0.0], requires_grad=True)
+t = train(x, model)
+plt.plot(t.loss)
+
+
 # Check model results:
 
-# In[63]:
+# In[22]:
 
 
 x[0].item()
 
 
-# In[51]:
+# In[23]:
 
+
+s = z3.Solver()
+s.from_file(smtlib_problems[0])
 
 skoX = z3.Real('skoX')
 skoY = z3.Real('skoY')
@@ -142,19 +171,19 @@ skoZ = z3.Real('skoZ')
 s.add(skoX == x[0].item() and skoY == x[1].item() and skoZ == x[2].item())
 
 
-# In[52]:
+# In[24]:
 
 
 s
 
 
-# In[53]:
+# In[25]:
 
 
 s.check()
 
 
-# In[54]:
+# In[26]:
 
 
 s.model()
@@ -164,24 +193,24 @@ s.model()
 # Can we learn from random start?
 # 
 
-# In[87]:
+# In[30]:
 
 
 x = torch.tensor(np.random.uniform(-10, 10, (3,)), requires_grad=True)
 x
 
 
-# In[88]:
+# In[31]:
 
 
 model = CLNModel(B=3)
 
 print('x before', x, '\nloss before', 1-model(x))
-trace = train2(x, model)
+trace = train(x, model)
 print('\nx after', x, '\nloss after', 1-model(x))
 
 
-# In[89]:
+# In[32]:
 
 
 s = z3.Solver()
@@ -199,7 +228,7 @@ s.check()
 # - make B parameter
 # - go for more epochs
 
-# In[90]:
+# In[33]:
 
 
 def improved_train(x, model):
@@ -224,7 +253,7 @@ def improved_train(x, model):
     return pd.DataFrame({'loss':loss_trace})
 
 
-# In[91]:
+# In[34]:
 
 
 x = torch.tensor(np.random.uniform(-10, 10, (3,)), requires_grad=True)
@@ -242,7 +271,7 @@ print('\nx after', x, '\nloss after', 1-model(x))
 
 # check if solving reliably...
 
-# In[92]:
+# In[35]:
 
 
 s = z3.Solver()
@@ -252,6 +281,14 @@ skoY = z3.Real('skoY')
 skoZ = z3.Real('skoZ')
 s.add(skoX == x[0].item() and skoY == x[1].item() and skoZ == x[2].item())
 s.check()
+
+
+# See if you can solve problems 1-3!
+
+# In[36]:
+
+
+smtlib_problems
 
 
 # In[ ]:
